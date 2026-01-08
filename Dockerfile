@@ -1,8 +1,16 @@
 FROM alpine:latest
 
-RUN apk add --no-cache curl bash
-RUN curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh | bash
+# نصب ابزارهای لازم
+RUN apk add --no-cache wget unzip ca-certificates
 
-COPY config.json /usr/local/etc/xray/config.json
+# دانلود و نصب دستی Xray
+RUN wget https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-64.zip && \
+    unzip Xray-linux-64.zip -d /usr/local/bin/ && \
+    chmod +x /usr/local/bin/xray && \
+    rm Xray-linux-64.zip
 
-CMD ["xray", "-config", "/usr/local/etc/xray/config.json"]
+# کپی فایل کانفیگ
+COPY config.json /etc/xray/config.json
+
+# اجرای Xray
+CMD ["/usr/local/bin/xray", "run", "-c", "/etc/xray/config.json"]
